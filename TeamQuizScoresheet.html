@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Team Quiz Scoresheet</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+<style>
+html, body { margin: 0px; padding: 0px; border: 0px; }
+.scoresheet,table {
+  border-collapse: collapse !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.9em;
+}
+.scoresheet,td {
+  border:1px solid #000;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+</style>
+</head>
+<body ng-app="App">
+<div ng-controller="Controller">
+<div class="container-fluid">
+<h1>Team Quiz Scoresheet</h1>
+<table class="scoresheet"><tr><td>
+<table class="scoresheet"><tr><td class="text-center">Home</td><td colspan="{{PPT+2}}">{{Details.H.N}}</td></tr><tr ng-repeat="p in Details.H.P" ng-init="s=$index"><td class="text-center">P{{s+1}}</td><td colspan="{{PPT}}">{{p.N}}</td><td class="text-center">{{p.S}}</td><td class="text-center"><span ng-show="Details.H.C==s+1">&checkmark;</span></td></tr><tr><td class="text-center">Round</td><td colspan="{{PPT}}" class="text-center">Player</td><td class="text-center">First</td><td class="text-center"><span ng-bind-html="Grid.H.F|render"></span></td></tr><tr><td class="text-center">Number</td><td ng-repeat="p in PArray" class="text-center">P{{p}}</td><td>Start</td><td class="text-center">{{Grid.H.S}}</td></tr><tr ng-repeat="r in RoundsArray"><td class="text-center">R{{r}}</td><td ng-repeat="p in PArray">{{Grid.H.TwoX['R'+r+'P'+p]}}&#9585;{{Grid.H.Ones['R'+r+'P'+p]}}</td><td class="text-center">{{Grid.H.RPts['R'+r]}}</td><td class="text-center">{{Grid.H.RSub['R'+r]}}</td></tr><tr><td class="text-center">Total</td><td ng-repeat="p in PArray" class="text-center">{{Grid.H.PPts['P'+p]}}({{Grid.H.PTwos['P'+p]}})</td><td></td><td class="text-center">{{Grid.H.Total}}</td></tr></table>
+</td><td>
+<table class="scoresheet"><tr><td class="text-center">Away</td><td colspan="{{PPT+2}}">{{Details.A.N}}</td></tr><tr ng-repeat="p in Details.A.P" ng-init="s=$index"><td class="text-center">P{{s+1}}</td><td colspan="{{PPT}}">{{p.N}}</td><td class="text-center">{{p.S}}</td><td class="text-center"><span ng-show="Details.A.C==s+1">&checkmark;</span></td></tr><tr><td class="text-center">Round</td><td colspan="{{PPT}}" class="text-center">Player</td><td class="text-center">First</td><td class="text-center"><span ng-bind-html="Grid.A.F|render"></span></td></tr><tr><td class="text-center">Number</td><td ng-repeat="p in PArray" class="text-center">P{{p}}</td><td>Start</td><td class="text-center">{{Grid.A.S}}</td></tr><tr ng-repeat="r in RoundsArray"><td class="text-center">R{{r}}</td><td ng-repeat="p in PArray">{{Grid.A.TwoX['R'+r+'P'+p]}}&#9585;{{Grid.A.Ones['R'+r+'P'+p]}}</td><td class="text-center">{{Grid.A.RPts['R'+r]}}</td><td class="text-center">{{Grid.A.RSub['R'+r]}}</td></tr><tr><td class="text-center">Total</td><td ng-repeat="p in PArray" class="text-center">{{Grid.A.PPts['P'+p]}}({{Grid.A.PTwos['P'+p]}})</td><td></td><td class="text-center">{{Grid.A.Total}}</td></tr></table>
+</td></tr>
+<tr><td class="align-top" colspan="2"><span ng-bind-html="NotationScreen|render"></span></td></tr>
+<tr ng-repeat="f in Fields | filter:!f.S"><td class="align-top" colspan="2">{{f.N}}: {{Details[f.A]}}</td></tr>
+</table>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.5/angular.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rison@0.1.1/js/rison.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.1/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-qrcode/7.2.0/angular-qrcode.min.js"></script>
+<script>
+"use strict";
+function sequencearray(low,high,reverse){
+	var arr=[];
+	for(var i = low; i <= high; i++){
+		arr.push(i);
+	}
+	if (reverse) { arr.reverse(); }
+	return arr;
+}
+var App = angular.module('App', ['monospaced.qrcode']);
+App.filter('render', function($sce) { return $sce.trustAsHtml; });
+App.controller('Controller', function ($scope) {
+	$scope.reloadRoute = function() {
+		window.location.reload(false);
+	}
+	var hash = window.location.hash.substr(1);
+	var risondetails=hash.split(";")[0];
+	risondetails=risondetails.replace(/\+/g," ");
+	var notation=hash.split(";")[1];
+	$scope.NotationScreen=notation.replace(/,/g,",<wbr>");
+	var notes=notation.split(",");
+	var questions=notes.length; // 64
+	$scope.Details=rison.decode(risondetails);
+	$scope.Fields=[{"N":"Questioner","A":"Q"},{"N":"Date","A":"D"},{"N":"League","A":"L"},{"N":"Division","A":"T"},{"N":"Venue","A":"V"},{"N":"Competition","A":"C"},{"N":"Phase","A":"P"},{"N":"Match","A":"M"},{"N":"Notes","A":"N"}];
+	for (var i=0;i<$scope.Fields.length;i++){
+		if (typeof $scope.Details[$scope.Fields[i].A]!="undefined") { $scope.Fields[i].S=true; }
+	}
+	var ppt=($scope.Details.H.P.length+$scope.Details.A.P.length)/2;
+	$scope.PArray=sequencearray(1,ppt);
+	$scope.PPT=ppt;
+	var rounds=questions/(ppt*2);
+	$scope.RoundsArray=sequencearray(1,rounds);
+	$scope.Log=[];
+	$scope.Log.push({});
+	var x;
+	var end;
+	var pts;
+	var tpos;
+	var note;
+	for (var i=0;i<questions;i++) {
+		note=notes[i]
+		end=note[note.length-1];
+		if(end=="X"){ x=true;pts=0; } else { x=false;pts=parseInt(end,10); }
+		tpos=Math.max(note.search("H"),note.search("A"));
+		$scope.Log.push({"R":Math.floor(i/ppt/2)+1,"TBy":note[tpos],"PBy":parseInt(note.substring(tpos+1,note.length-1),10),"X":x,"P":pts});
+	}
+	$scope.Grid={};
+	$scope.Grid.H={};
+	$scope.Grid.A={};
+	if ($scope.Details.H.F==true) { $scope.Grid.H.F="&checkmark;"; }
+	if ($scope.Details.A.F==true) { $scope.Grid.A.F="&checkmark;"; }
+	$scope.Grid.H.S=$scope.Details.H.S;
+	$scope.Grid.A.S=$scope.Details.A.S;
+	$scope.Grid.H.TwoX={};
+	$scope.Grid.A.TwoX={};
+	$scope.Grid.H.Ones={};
+	$scope.Grid.A.Ones={};
+	$scope.Grid.H.RPts={};
+	$scope.Grid.A.RPts={};
+	$scope.Grid.H.RSub={};
+	$scope.Grid.A.RSub={};
+	for (var j=1;j<rounds+1;j++) {
+		$scope.Grid.H.RPts["R"+j]=0;
+		$scope.Grid.A.RPts["R"+j]=0;
+		$scope.Grid.H.RSub["R"+j]=0;
+		$scope.Grid.A.RSub["R"+j]=0;
+		for (var k=1;k<ppt+1;k++) {
+			$scope.Grid.H.TwoX["R"+j+"P"+k]="";
+			$scope.Grid.A.TwoX["R"+j+"P"+k]="";
+			$scope.Grid.H.Ones["R"+j+"P"+k]="";
+			$scope.Grid.A.Ones["R"+j+"P"+k]="";
+		}
+	}
+	$scope.Grid.H.PPts={};
+	$scope.Grid.A.PPts={};
+	$scope.Grid.H.PTwos={};
+	$scope.Grid.A.PTwos={};
+	for (var k=1;k<ppt+1;k++) {
+		$scope.Grid.H.PPts["P"+k]=0;
+		$scope.Grid.A.PPts["P"+k]=0;
+		$scope.Grid.H.PTwos["P"+k]=0;
+		$scope.Grid.A.PTwos["P"+k]=0;
+	}
+	$scope.Grid.H.Total=$scope.Grid.H.S;
+	$scope.Grid.A.Total=$scope.Grid.A.S;
+	for (var i=1;i<$scope.Log.length;i++) {
+		if (i==1) {
+			$scope.Grid.H.RSub['R'+1]=$scope.Grid.H.S;
+			$scope.Grid.A.RSub['R'+1]=$scope.Grid.A.S;
+		} else {
+			var rnow=$scope.Log[i].R;
+			var rpre=$scope.Log[i-1].R;
+			if (rnow!=rpre) {
+				$scope.Grid.H.RSub['R'+rnow]=$scope.Grid.H.RSub['R'+rpre];
+				$scope.Grid.A.RSub['R'+rnow]=$scope.Grid.A.RSub['R'+rpre];
+			}
+		}
+		var obj=$scope.Log[i];
+		var r=obj.R;
+		var p=obj.PBy;
+		if (obj.X==true) {
+			$scope.Grid[obj.TBy].TwoX['R'+r+'P'+p]="X";
+		} else {
+			var pts=obj.P;
+			if (pts==2) {
+				$scope.Grid[obj.TBy].TwoX['R'+r+'P'+p]=pts;
+				$scope.Grid[obj.TBy].PTwos['P'+obj.PBy]=$scope.Grid[obj.TBy].PTwos['P'+obj.PBy]+1;
+			}
+			if (pts==1) {
+				if ($scope.Grid[obj.TBy].Ones['R'+r+'P'+obj.PBy]=="") {
+					$scope.Grid[obj.TBy].Ones['R'+r+'P'+obj.PBy]=pts;
+				} else {
+					$scope.Grid[obj.TBy].Ones['R'+r+'P'+obj.PBy]=$scope.Grid[obj.TBy].Ones['R'+r+'P'+obj.PBy]+1;
+				}
+			}
+			$scope.Grid[obj.TBy].RPts['R'+r]=$scope.Grid[obj.TBy].RPts['R'+r]+pts;
+			$scope.Grid[obj.TBy].RSub['R'+r]=$scope.Grid[obj.TBy].RSub['R'+r]+pts;
+			$scope.Grid[obj.TBy].PPts['P'+obj.PBy]=$scope.Grid[obj.TBy].PPts['P'+obj.PBy]+pts;
+			$scope.Grid[obj.TBy].Total=$scope.Grid[obj.TBy].Total+pts;
+		}
+	}
+});
+</script>
+</body>
+</html>
