@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Team Quiz Template</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+</head>
+<body ng-app="App">
+<div ng-controller="Controller">
+<div class="container-fluid">
+<h1>Team Quiz Template</h1>
+<h5>Generates a template for a team quiz, to be pasted into cell A1 of a spreadsheet.</h5>
+<div class="input-group">
+  <div class="input-group-prepend">
+    <label class="input-group-text" for="">Pick subjects</label>
+  </div>
+  <select class="custom-select" id="" ng-model="SubjectsCSVSelected" ng-change="SubjectsCSVPick()">
+    <option value="" selected>Choose...</option>
+    <option ng-repeat="o in SubjectsCSVOptions">{{o}}</option>
+  </select>
+</div>
+<div class="input-group">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon3">or list/edit your own 8 subjects</span>
+  </div>
+  <input type="text" ng-model="SubjectsCSVList" class="form-control" id="" aria-describedby="basic-addon3" ng-change="SubjectsCSVChange()"><div class="input-group-append"><span class="input-group-text" id="basic-addon3">{{ArrayLength}}</span></div>
+</div>
+<div class="input-group collapse"><div class="input-group-prepend"><span class="input-group-text">Rounds</span></div><div class="input-group-append"><select class="custom-select" ng-model="Rounds" ng-options="r for r in RoundOptions"></select></div></div>
+<div class="input-group collapse"><div class="input-group-prepend"><span class="input-group-text">Players Per Team</span></div><div class="input-group-append"><select class="custom-select" ng-model="PPT" ng-options="p for p in PPTOptions"></select></div></div>
+<div class="input-group"><div class="input-group-prepend"><span class="input-group-text">Spares</span></div><div class="input-group-append"><select class="custom-select" ng-model="Spares" ng-options="s for s in SpareOptions"></select></div></div>
+
+<button class="btn btn-primary" id="calculatedistribution" ng-click="calculate()" ng-show="ShowCalculate">Calculate Distribution (can take several seconds)</button><span id="attempts"></span>
+<div ng-show="ShowQuizText">
+<textarea id="quiztext" class="form-control"></textarea>
+<button class="btn btn-primary" id="clipboardbutton" data-clipboard-action="cut" data-clipboard-target="#quiztext" ng-click="cut()">Click to copy the data, then paste to cell A1 of a spreadsheet</button>
+</div>
+<div ng-show="ShowQuizTable">
+<table id="quiztable" class="table table-sm table-bordered table-nonfluid">
+<thead><tr><th>Sort</th><th>Index</th><th>Num</th><th>Level</th><th>Pair</th><th>Subject</th><th>Round</th><th>Player</th></tr></thead>
+<tbody><tr ng-repeat="q in Quiz"><td>{{q.Sort}}</td><td>{{q.Index}}</td><td>{{q.Num}}</td><td>{{q.Level}}</td><td>{{q.Pair}}</td><td>{{q.Subject}}</td><td>{{q.Round}}</td><td>{{q.Player}}</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.5/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/random-js/1.0.8/random.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+<script>
+"use strict";
+function evensequencearray(low,high,reverse){
+	var arr=[];
+	for(var i = low; i <= high; i=i+2){
+		arr.push(i);
+	}
+	if (reverse) { arr.reverse(); }
+	return arr;
+}
+function sequencearray(low,high,reverse){
+	var arr=[];
+	for(var i = low; i <= high; i++){
+		arr.push(i);
+	}
+	if (reverse) { arr.reverse(); }
+	return arr;
+}
+function zeroarray(size){
+	var arr=[];
+	for(var i=0;i<size;i++){
+		arr.push(0);
+	}
+	return arr;
+}
+var App = angular.module('App',[]);
+App.controller('Controller', function ($scope,$filter,$window) {
+	$scope.RoundOptions=evensequencearray(2,100);
+	$scope.PPTOptions=sequencearray(1,20);
+	$scope.SpareOptions=sequencearray(0,20);
+	$scope.SubjectsCSVOptions=[
+	"1,2,3,4,5,6,7,8",
+	"A,B,C,D,E,F,G,H",
+	"Geo,Ent,His,A&L,S&N,S&L,Current,Misc",
+	"Art & Lit,Ent,Geog,Hist,Life,Mus,Sci & Nat,Sport",
+	"Art & Lit,Ent,Geog,Hist,Misc,Mus,Sci & Nat,Sport",
+	"Art & Lit,Ent,Geog,Hist,Life,Misc,Sci & Nat,Sport"];
+	//Clt,Ent,His,Med,Lfs,Sci,Spt,Wld
+	$scope.Rounds=8;
+	$scope.PPT=4;
+	$scope.Spares=4;
+	$scope.SubjectsCSVPick=function() {
+		$scope.ShowQuizText=false;
+		$scope.ShowQuizTable=false;
+		$scope.ShowCalculate=false;
+		$scope.SubjectsCSVList=$scope.SubjectsCSVSelected;
+		$scope.SubjectsCSVChange();
+	}
+	$scope.SubjectsCSVChange=function() {
+		$scope.ShowQuizText=false;
+		$scope.ShowQuizTable=false;
+		$scope.ShowCalculate=false;
+		var str=$scope.SubjectsCSVList;
+		var arr=str.split(",");
+		if (str.trim()==""){
+			$scope.ArrayLength=0;
+		} else {
+			$scope.ArrayLength=arr.length;
+		}
+		var fail=false;
+		if (arr.length==$scope.Rounds) {
+			for (var i=0;i<arr.length;i++) {
+				for (var j=0;j<arr.length;j++) {
+					if (arr[i].trim()=="" || arr[j].trim()=="") {
+						fail=true;
+					}
+					if (arr[i].trim()==arr[j].trim() && i!=j) {
+						fail=true;
+					}
+				}
+			}
+			if (fail==false) { $scope.ShowCalculate=true; }
+		}
+	}
+	$scope.calculate=function() {
+		var attempts=0;
+		$scope.ShowQuizText=false;
+		$scope.ShowQuizTable=false;
+		$scope.ShowCalculate=false;
+		$("#QuizText").blur();
+		var engine = Random.engines.mt19937().autoSeed();
+		var index=0;
+		var pair=0;
+		var level=0;
+		var levelmax=$scope.PPT;
+		var rounds=$scope.Rounds;
+		var h1max=rounds/2;
+		var h2min=h1max+1;
+		var qpr=$scope.PPT*2;
+		var questions=rounds*qpr;
+		var subject=$scope.SubjectsCSVList.split(",");
+		var subjects=subject.length;
+		$scope.Quiz=[];
+		for (var r=0;r<rounds;r++) {
+			var qins=0;
+			for (var p=0;p<qpr;p++) {
+				index++;
+				pair=Math.floor((index+1)/2);
+				qins++;
+				level=Math.floor((qins+1)/2);
+				$scope.Quiz.push({"Index":index,"Subject":subject[r],"Pair":pair,"Level":level,"Round":0,"Num":0});
+			}
+		}
+		var fail;
+		do {
+			var tries=0;
+			do {
+				attempts++;
+				var arr=sequencearray(1,questions);
+				Random.shuffle(engine, arr);
+				$scope.RoundUsed=[];
+				for (var q=0;q<questions;q++) {
+					$scope.RoundUsed.push({"Round":Math.floor((arr[q]-1)/qpr)+1,"Used":false});
+				}
+				$scope.SubjectRound=[];
+				for (var s=0;s<subjects;s++) {
+					$scope.SubjectRound.push({"Subject":subject[s],"Round":zeroarray(rounds)});
+				}
+				$scope.RoundLevel=[];
+				for (var r=0;r<rounds;r++) {
+					$scope.RoundLevel.push({"Round":r+1,"Level":zeroarray(levelmax)});
+				}
+				var sub;
+				var lev;
+				var round;
+				var done;
+				for (var q=0;q<questions;q++) {
+					done=false;
+					sub=$scope.Quiz[q].Subject;
+					lev=$scope.Quiz[q].Level;
+					for (var p=0;p<questions;p++) {
+						if (done==false) {
+							// Find the first suitable line in the picker and add it 
+							// Round must be first half, second half, no repeats within subject, exactly 2 of each level per round
+							round=$scope.RoundUsed[p].Round;
+							if ($scope.RoundUsed[p].Used==false) {
+								if ((q%2==0 && round<=h1max) || (q%2==1 && round>=h2min)) { // valid half: first half, second half
+									for (var s=0;s<$scope.SubjectRound.length;s++) {
+										if ($scope.SubjectRound[s].Subject==sub && $scope.SubjectRound[s].Round[round-1]<1 ) {
+											for (var r=0;r<rounds;r++) {
+												if ($scope.RoundLevel[r].Round==round && $scope.RoundLevel[r].Level[lev-1]<2 ) {
+													$scope.SubjectRound[s].Round[round-1]++;
+													$scope.RoundLevel[r].Level[lev-1]++;
+													$scope.RoundUsed[p].Used=true;
+													$scope.Quiz[q].Round=round;
+													done=true;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				var blanks=0;
+				for (var i=0;i<$scope.Quiz.length;i++) {
+					if ($scope.Quiz[i].Round==0) {
+						blanks=blanks+1;
+					}
+				}
+				if (blanks>0) {
+					for (var i=0;i<$scope.Quiz.length;i++) {
+						$scope.Quiz[i].Round=0;
+					}
+				}
+				tries++;
+				if (tries>10) { blanks=0; }
+				$("#attempts").html(attempts);
+			}
+			while ( blanks>0 );
+			
+			var tries=0;
+			do {
+				attempts++;
+				var arr=sequencearray(1,questions);
+				Random.shuffle(engine, arr);
+				$scope.NumUsed=[];
+				for (var q=0;q<questions;q++) {
+					$scope.NumUsed.push({"Num":Math.floor((arr[q]-1)/qpr)+1,"Used":false});
+				}
+				$scope.SubjectNum=[]; // 1 of each subject for each player
+				for (var s=0;s<subjects;s++) {
+					$scope.SubjectNum.push({"Subject":subject[s],"Num":zeroarray(qpr)});
+				}
+				$scope.RoundNum=[]; // 1 for each player in each round
+				for (var r=0;r<rounds;r++) {
+					$scope.RoundNum.push({"Round":r+1,"Num":zeroarray(qpr)}); 
+				}
+				$scope.NumLevel=[]; // 2 of each level per player
+				for (var n=0;n<qpr;n++) {
+					$scope.NumLevel.push({"Num":n+1,"Level":zeroarray(levelmax)}); 
+				}
+				$scope.OddEvenLevel=[]; // 1 of each level per team per round
+				for (var o=0;o<rounds;o++) {
+					$scope.OddEvenLevel.push({"OddEven":"O","Round":o+1,"Level":zeroarray(levelmax)}); 
+					$scope.OddEvenLevel.push({"OddEven":"E","Round":o+1,"Level":zeroarray(levelmax)}); 
+				}	
+				$scope.Quiz[0].Num=$scope.NumUsed[0].Num;
+				$scope.NumUsed[0].Used=true;
+				for (var s=0;s<$scope.SubjectNum.length;s++) {
+					if ($scope.SubjectNum[s].Subject==$scope.Quiz[0].Subject) {
+						$scope.SubjectNum[s].Num[$scope.Quiz[0].Num-1]=1;
+					}
+				}
+				for (var r=0;r<$scope.RoundNum.length;r++) {
+					if ($scope.RoundNum[r].Round==$scope.Quiz[0].Round) {
+						$scope.RoundNum[r].Num[$scope.Quiz[0].Num-1]=1;
+					}
+				}
+				for (var n=0;n<$scope.NumLevel.length;n++) {
+					if ($scope.NumLevel[n].Num==$scope.Quiz[0].Num) {
+						$scope.NumLevel[n].Level[$scope.Quiz[0].Level-1]=1;
+					}
+				}
+				var oddeven;
+				for (var o=0;o<$scope.OddEvenLevel.length;o++) {
+					if($scope.Quiz[0].Num%2==1) { oddeven="O"; } else { oddeven="E"; }
+					if ($scope.OddEvenLevel[o].OddEven==oddeven && $scope.OddEvenLevel[o].Round==$scope.Quiz[0].Round ) {
+						$scope.OddEvenLevel[o].Level[$scope.Quiz[0].Level-1]=1;
+					}
+				}
+				
+				var num;
+				for (var q=1;q<questions;q++) {
+					done=false;
+					sub=$scope.Quiz[q].Subject;
+					lev=$scope.Quiz[q].Level;
+					round=$scope.Quiz[q].Round;
+					for (var p=0;p<questions;p++) {
+						num=$scope.NumUsed[p].Num;
+						if (done==false) {
+							if ($scope.NumUsed[p].Used==false) {
+								if ((num%2) != ($scope.Quiz[q-1].Num%2) || $scope.Quiz[q].Subject != $scope.Quiz[q-1].Subject) {
+									for (var s=0;s<$scope.SubjectNum.length;s++) {
+										if ($scope.SubjectNum[s].Subject==sub && $scope.SubjectNum[s].Num[num-1]<1 ) {
+											for (var r=0;r<$scope.RoundNum.length;r++) {
+												if ($scope.RoundNum[r].Round==round && $scope.RoundNum[r].Num[num-1]<1 ) {
+													for (var n=0;n<$scope.NumLevel.length;n++) {
+														if ($scope.NumLevel[n].Num==num && $scope.NumLevel[n].Level[lev-1]<2) {
+															for (var o=0;o<$scope.OddEvenLevel.length;o++) {
+																if(num%2==1) { oddeven="O"; } else { oddeven="E"; }
+																if ($scope.OddEvenLevel[o].OddEven==oddeven && $scope.OddEvenLevel[o].Round==round && $scope.OddEvenLevel[o].Level[lev-1]<1 ) {
+																	$scope.NumUsed[p].Used=true;
+																	$scope.SubjectNum[s].Num[num-1]++;
+																	$scope.RoundNum[r].Num[num-1]++;
+																	$scope.NumLevel[n].Level[lev-1]++;
+																	$scope.OddEvenLevel[o].Level[lev-1]++;
+																	$scope.Quiz[q].Num=num;
+																	done=true;
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}				
+				
+				var blanks=0;
+				for (var i=0;i<$scope.Quiz.length;i++) {
+					if ($scope.Quiz[i].Num==0) {
+						blanks=blanks+1;
+					}
+				}
+				if (blanks>0) {
+					for (var i=0;i<$scope.Quiz.length;i++) {
+						$scope.Quiz[i].Num=0;
+					}
+				}
+				tries++;
+				if (tries>10) { blanks=0; }
+				$("#attempts").html(attempts);
+			}
+			while ( blanks>0 );
+			if ($scope.Quiz[0].Round==0 || $scope.Quiz[0].Num==0) { fail=true; } else { fail=false; }
+		}
+		while ( fail==true );
+		var AorB;
+		var half;
+		var plusminus;
+		for (var i=0;i<$scope.Quiz.length;i++) {
+			plusminus=0;
+			if ( $scope.Quiz[i].Round<=h1max ) { half=1; } else { half=2; }
+			if ((half+($scope.Quiz[i].Num%2))%2==0 ) { AorB="A"; } else { AorB="B"; }
+			$scope.Quiz[i].Player=(Math.floor(($scope.Quiz[i].Num-1)/2)+1).toString()+AorB;
+			if ( half==2 && AorB=="A" ) { plusminus=-1; }
+			if ( half==2 && AorB=="B" ) { plusminus=1; }
+			$scope.Quiz[i].Sort=(($scope.Quiz[i].Round-1)*rounds)+$scope.Quiz[i].Num+plusminus;
+		}
+		for (var s=0;s<$scope.Spares;s++) {
+			index++;
+			$scope.Quiz.push({"Round":"S","Index":index,"Subject":"Any","Pair":"N/A","Num":"N/A","Level":"Any","Sort":index,"Player":s+1});
+		}
+		var text="Sort\tIndex\tNum\tLevel\tPair\tSubject\tRound\tPlayer\tQuestion\tAnswer\tWrite paired Q&amp;A in columns I &amp; J. When finished, sort by column A.";
+		var json=$scope.Quiz;
+		for (var i=0;i<json.length;i++) {
+			text+="\n"+json[i].Sort+"\t"+json[i].Index+"\t"+json[i].Num+"\t"+json[i].Level+"\t"+json[i].Pair+"\t"+json[i].Subject+"\t"+json[i].Round+"\t"+json[i].Player+"";
+		}
+		new ClipboardJS("#clipboardbutton");
+		$("#quiztext").html(text);
+		$scope.ShowQuizText=true;
+		$scope.ShowCalculate=false;
+	}
+	$scope.cut = function(){
+		$scope.ShowCalculate=false;
+		$window.location.reload();
+	}
+});
+</script>
+</body>
+</html>
