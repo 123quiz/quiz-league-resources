@@ -56,7 +56,7 @@ App.controller('Controller', function ($scope) {
 	}
 	var hash = window.location.hash.substr(1);
 	var risondetails=hash.split(";")[0];
-	risondetails=risondetails.replace(/\+/g," ");
+	risondetails=risondetails.replace(/\+/g," ").replace(/%27/g,"'");
 	var notation=hash.split(";")[1];
 	$scope.NotationScreen=notation.replace(/,/g,",<wbr>");
 	var notes=notation.split(",");
