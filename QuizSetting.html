@@ -47,7 +47,7 @@ textarea { width:98%;height:100%; }
 <li>A template generator is available: <a href="https://123quiz.github.io/quiz-league-resources/TeamQuizTemplate.html" target="_blank">TeamQuizTemplate.html</a></li>
 <li>Import the quiz questions, answers and data from a spreadsheet in one go.</li>
 <li>Underlining of the required part(s) of the answer, other text formatting and editing takes place in the browser.</li>
-<li>The quiz is Locked and Downloaded as an HTML file for distribution.</li>
+<li>The quiz is locked and downloaded as an HTML file for distribution.</li>
 <li>All sensitive information, including Question and Answer text is encrypted using the <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf" target="_blank">Advanced Encryption Standard</a>.</li>
 <li>Unlike with paper scoresheets, full information on 1s and spares is recorded.</li>
 <li>A clock displaying seconds can be used for timing.</li>
@@ -911,7 +911,9 @@ function decrypt(ciphertext,password) {
 	}
 	return res;
 }
-
+window.onbeforeunload = function() {
+	return "Leaving or refreshing this page will result in data loss";
+};
 var myVar = setInterval(function() {
 	myTimer();
 }, 1000);
@@ -1678,6 +1680,9 @@ App.directive("quiz", function($compile){
 	return{
 		link: function(scope, element){
 			var linkFn = $compile(""+
+"<div class=\\"container-fluid\\">"+
+"<div class=\\"row\\">"+
+"<div class=\\"col-12\\">"+
 "<h2>Quiz<\/h2>"+
 "<div class=\\"alert alert-info\\">Setter: {{SetterDetails.Setter}}<br>Editor: {{SetterDetails.Editor}}<br>Correct Date: {{SetterDetails.Correct}}<br>Playing Date: {{SetterDetails.Playing}}<br>League: {{SetterDetails.League}}<br>Competition: {{SetterDetails.Competition}}<br>Phase: {{SetterDetails.Phase}}<br>Match: {{SetterDetails.Match}}<br>Notes: {{SetterDetails.Notes}}<\/div>"+
 "<div class=\\"alert alert-info\\"><strong>Note<\/strong> If a scoring mistake is made and\/or a spare question is needed, use the question's dropdown button e.g.: <div style=\\"background-color:#fff;display: inline-block;\\"><div class=\\"btn-group\\"><button type=\\"button\\" class=\\"btn btn-outline-primary dropdown-toggle\\" aria-haspopup=\\"true\\" aria-expanded=\\"false\\">R1 1A<\/button><\/div><\/div> to edit the scoring or replace the question with a spare. Use this <div style=\\"background-color:#fff;display: inline-block;\\"><div class=\\"btn-group\\"><button type=\\"button\\" class=\\"btn btn-outline-primary\\" ng-click=\\"flip()\\">Flip<\/button><\/div><\/div> button if you need to swap the seating positions around.<\/div>"+
@@ -1714,6 +1719,9 @@ App.directive("quiz", function($compile){
 "<tbody><tr><td style=\\"width:1%\\">{{s.Player}}<\/td><td style=\\"width:59%\\"><span ng-bind-html=\\"s.Question|render\\">{{s.Question}}<\/span><\/td><td style=\\"width:40%\\"><span ng-bind-html=\\"s.Answer|render\\">{{s.Answer}}<\/span><\/td><\/tr><\/tbody>"+
 "<\/table><\/td><\/tr>"+
 "<\/table>"+
+"<\/div>"+
+"<\/div>"+
+"<\/div>"+
 "");
 			var content = linkFn(scope);
 			element.append(content);
