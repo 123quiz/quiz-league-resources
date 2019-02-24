@@ -453,14 +453,19 @@ qrcode>canvas {
   <\/div>
 <\/div>
 <div class="container-fluid">
+<div class="row">
+<div class="col-12">
 <div id="passwordcontainer">
 <h2>Unlock<\/h2>
-<div class="alert alert-info"><strong>Note<\/strong> Home password followed by Away password (no spaces, case-sensitive).<\/div>
+<div class="alert alert-info">If a mobile browser is used, Chrome is reccomended. If Firefox is used, it should be set to Desktop mode now. Other browsers are untested.<\/div>
+<div class="alert alert-info">Home password followed by Away password (no spaces, case-sensitive).<\/div>
 <div class="input-group"><div class="input-group-prepend"><span class="input-group-text">Password<\/span><\/div><input type="text" class="form-control" id="password" ng-model="password" ng-change="unlock();" autofocus><\/div>
 <\/div>
 <div id="detailscontainer" ng-show="ShowDetails" details><\/div>
 <div id="quizcontainer" ng-show="ShowQuiz" quiz><\/div>
 <div id="clipboard" class="h6" ng-bind-html="QuizResult"><\/div>
+<\/div>
+<\/div>
 <\/div>
 <\/div>
 
