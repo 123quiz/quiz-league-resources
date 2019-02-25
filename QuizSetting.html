@@ -76,7 +76,7 @@ u { text-decoration-skip-ink: none; }
 </ul>
 <p>A template generator is available here: <a href="https://123quiz.github.io/quiz-league-resources/TeamQuizTemplate.html" target="_blank">TeamQuizTemplate.html</a></p>
 </div>
-<div id="toggle"><button type="button" class="btn btn-outline-primary btn-lg" onclick="toggleTableTSV('quiz');">The quiz is has been pasted</button></div>
+<div id="toggle"><button type="button" class="btn btn-outline-primary btn-lg" onclick="toggleTableTSV('quiz');">The quiz has been pasted</button></div>
 <div id="lock">
 <h2>Details</h2>
 <div class="alert alert-info">All details are optional. Reccomended password size is 16 alphanumeric characters.</div>
@@ -308,6 +308,7 @@ var json;
 		html="<textarea id=\"tsv\">"+JSON2TSV(json)+"</textarea>";
 		quiz.innerHTML=html;
 	}
+	document.documentElement.scrollTop=0;
 }
 function doneEditing(){
 	// Carry out some checks
