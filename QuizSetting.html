@@ -451,8 +451,6 @@ u { text-decoration-skip-ink: none; }
       <\/div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close<\/button>
-        <button type="button" class="btn btn-primary clipboard" data-clipboard-target="#clipboard">Copy result to clipboard<\/button>
-		
       <\/div>
     <\/div>
   <\/div>
@@ -460,15 +458,14 @@ u { text-decoration-skip-ink: none; }
 <div class="container-fluid">
 <div class="row">
 <div class="col-12">
-<div id="passwordcontainer">
+<div id="passwordcontainer" class="container-fluid">
 <h2>Unlock<\/h2>
 <div class="alert alert-info">If a mobile browser is used, Chrome is recommended. If Firefox is used, it should be set to Desktop mode now. Other browsers are untested.<\/div>
 <div class="alert alert-info">Home password followed by Away password (no spaces, case-sensitive).<\/div>
 <div class="input-group"><div class="input-group-prepend"><span class="input-group-text">Password<\/span><\/div><input type="text" class="form-control" id="password" ng-model="password" ng-change="unlock();" autofocus><\/div>
 <\/div>
-<div id="detailscontainer" ng-show="ShowDetails" details><\/div>
-<div id="quizcontainer" ng-show="ShowQuiz" quiz><\/div>
-<div id="clipboard" class="h6" ng-bind-html="QuizResult"><\/div>
+<div id="detailscontainer" class="container-fluid" ng-show="ShowDetails" details><\/div>
+<div id="quizcontainer" class="container-fluid" ng-show="ShowQuiz" quiz><\/div>
 <\/div>
 <\/div>
 <\/div>
@@ -1227,7 +1224,7 @@ App.controller('Controller', function ($scope) {
 		$scope.Grid.H.Total=$scope.Grid.H.S;
 		$scope.Grid.A.Total=$scope.Grid.A.S;
 		for (var i=1;i<$scope.Log.length;i++) {
-			var button=$scope.Log[i].Button
+			var button=$scope.Log[i].Button;
 			if (button!="") {
 				if (i==1) {
 					$scope.Grid.H.RSub['R'+1]=$scope.Grid.H.S;
@@ -1353,13 +1350,10 @@ App.controller('Controller', function ($scope) {
 		if ($scope.Log[index].Details.H.RoundHouse>0) { $scope.HomeAsterisk="*"; }
 		if ($scope.Log[index].Details.A.RoundHouse>0) { $scope.AwayAsterisk="*"; }
 		
-		
 		$scope.Scoreline="<div class=\\"row no-gutters\\"><div class=\\"col border-0\\">"+$scope.Details.H.N+"<\/div><div class=\\"col border-0\\">&nbsp;"+$scope.Log[index].Details.H.Points+$scope.HomeAsterisk+"-"+$scope.Log[index].Details.A.Points+$scope.AwayAsterisk+"&nbsp;<\/div><div class=\\"col border-0\\">"+$scope.Details.A.N+"<\/div><\/div><div class=\\"row no-gutters\\"><div class=\\"col border-0 invisible\\">"+$scope.Details.H.N+"<\/div><div class=\\"col border-0\\">"+$scope.Log[index].Details.H.RoundPoints+"-"+$scope.Log[index].Details.A.RoundPoints+"<\/div><div class=\\"col border-0 invisible\\">"+$scope.Details.A.N+"<\/div><\/div>";
 		$scope.RawScore="Raw Score: "+$scope.Log[index].Details.H.RawPoints+"-"+$scope.Log[index].Details.A.RawPoints;
 		
 		if (index==$scope.Log.length-1) { return; } \/\/ we are at the end of the array
-		
-		setTimeout(function() { $.scrollTo(document.getElementById('R'+nextr+'_'+nextPX), { duration: 1000, offset: -120 }) }, 1000);
 		
 		if ($scope.Log[index+1].Button !="") {
 			var nextevent = {};
@@ -1367,6 +1361,7 @@ App.controller('Controller', function ($scope) {
 			nextevent.target.id=$scope.Log[index+1].Button;
 			$scope.score(nextevent);
 		}
+		setTimeout(function() { $.scrollTo(document.getElementById('R'+nextr+'_'+nextPX), { duration: 1000, offset: -120 }) }, 1000);
 	}
 	$scope.refreshnotation = function() {
 		var notation="";
@@ -1738,7 +1733,10 @@ App.directive("quiz", function($compile){
 "<tfoot><tr><td colspan=\\"3\\" class=\\"text-center\\"><\/td><td class=\\"text-center\\"><button id=\\"{{q.Spare.Prefix}}R{{q.Round}}_{{q.Player}}_{{Log[log+1].PF2.T}}{{Log[log+1].PF2.Seat}}_X\\" type=\\"button\\" class=\\"btn btn-outline-primary btn-lg\\" ng-click=\\"score($event);\\" disabled=\\"disabled\\">X<\/button><\/td><td colspan=\\"3\\" class=\\"text-center\\"><\/td><\/tr><tr><td colspan=\\"7\\" class=\\"text-center align-middle\\"><div ng-bind-html=\\"Log[log+1].Message\\"><\/div><\/td><\/tr><\/tfoot>"+
 "<\/tbody><\/table><\/td><\/tr><\/tfoot><\/table>"+
 "<\/td><\/tr>"+
-"<tr><td class=\\"text-center\\"><button ng-click=\\"scoresheet();\\" type=\\"button\\" class=\\"btn btn-outline-primary btn-lg clipboard\\" data-clipboard-target=\\"#clipboard\\">Copy result to clipboard<\/button><div class=\\"alert alert-info\\">After copying the result to clipboard, it still only exists on your device, so please share it promptly via your organization's preferred method e.g.: Email \/ Facebook \/ Twitter \/ WhatsApp etc.<\/div><div class=\\"alert alert-warning\\">If this device is not connected to the Internet, press the scoreline button (top of this page) and get someone who can scan the QR code (e.g. with Google Lens) to share the result.<\/div><div class=\\"alert alert-info\\"><span ng-bind-html=\\"QuizResultEmail|render\\"><\/span><\/div><\/td><\/tr>"+
+"<tr><td class=\\"text-center\\"><button type=\\"button\\" ng-click=\\"scoresheet();\\" class=\\"btn btn-outline-primary btn-lg\\">Generate result text<\/button>"+
+"<tr><td class=\\"text-center\\"><input type=\\"text\\" class=\\"form-control\\" id=\\"quizresult\\" ng-value=\\"QuizResult\\"><\/td><\/tr>"+
+"<tr><td class=\\"text-center\\"><button type=\\"button\\" class=\\"btn btn-outline-primary btn-lg clipboard\\" data-clipboard-target=\\"#quizresult\\">Copy result to clipboard<\/button>"+
+"<div class=\\"alert alert-info\\">After copying the result to clipboard, it still only exists on your device, so please share it promptly via your organization's preferred method e.g.: Email \/ Facebook \/ Twitter \/ WhatsApp etc.<\/div><div class=\\"alert alert-warning\\">If this device is not connected to the Internet, press the scoreline button (top of this page) and get someone who can scan the QR code (e.g. with Google Lens) to share the result.<\/div><div class=\\"alert alert-info\\"><span ng-bind-html=\\"QuizResultEmail|render\\"><\/span><\/div><\/td><\/tr>"+
 "<tr><td class=\\"text-center\\">Spares<\/td><\/tr>"+
 "<tr ng-repeat=\\"s in Spares\\"><td>"+
 "<table class=\\"table table-sm table-bordered\\">"+
