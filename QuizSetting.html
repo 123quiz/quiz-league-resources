@@ -949,6 +949,21 @@ function sequencearray(low,high,reverse){
 	return arr;
 }
 
+function twosequencearray(start1,end1,start2,end2){
+	var arr=[];
+	var dir1=(start1<end1) ? 1 : -1;
+	var dir2=(start2<end2) ? 1 : -1;
+	for (var i=start1;i!=(end1+dir1);i=i+dir1) {
+		arr.push(i);
+	}
+	for (var i=start2;i!=(end2+dir2);i=i+dir2) {
+		arr.push(i);
+	}	
+	return arr;
+}
+
+
+
 function RoundsInQuiz(quiz){
 	var rounds=0;
 	for (var i=0,l=quiz.length;i<l;i++){
@@ -1414,8 +1429,8 @@ App.controller('Controller', function ($scope) {
 			$scope.PosArray=sequencearray(1,$scope.PPT,true); \/\/ 4,3,2,1
 			$scope.RoundsArray=sequencearray(1,$scope.Rounds);
 			$scope.PArray=sequencearray(1,$scope.PPT);
-			$scope.PStarts=sequencearray(0,20);
-			$scope.TStarts=sequencearray(0,80);
+			$scope.PStarts=twosequencearray(0,20,-1,-20);
+			$scope.TStarts=twosequencearray(0,80,-1,-80);
 			$scope.Details={};
 			$scope.Details.H={};
 			$scope.Details.A={};
