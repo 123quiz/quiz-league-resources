@@ -6,3 +6,5 @@ https://123quiz.github.io/quiz-league-resources/TeamQuizTemplate.html
 https://123quiz.github.io/quiz-league-resources/QuizSetting.html
 
 https://123quiz.github.io/quiz-league-resources/TeamQuizScoresheet.html
+
+https://123quiz.github.io/quiz-league-resources/TeamQuizTest.html
