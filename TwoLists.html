@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Two Lists</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="#">Two Lists</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+			aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				<div ng-repeat="Group in Groups">
+					<li class="nav-item dropdown" style="float: left;">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{Group.Operator}}</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<div ng-repeat="Operator in Operators">
+								<a class="dropdown-item" href="#"
+									ng-click="setting(Group.Operator,Operator.Internal)">{{Operator.Visual}}</a>
+							</div>
+						</div>
+					</li>
+					<li class="nav-item dropdown" style="float: left;">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{Group.Number}}#</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<div ng-repeat="Number in Numbers">
+								<a class="dropdown-item" href="#" ng-click="setting(Group.Number,Number)">{{Number}}</a>
+							</div>
+						</div>
+					</li>
+				</div>
+			</ul>
+			<!--<form class="form-inline my-2 my-lg-0">
+				<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+			</form>-->
+		</div>
+	</nav>
+	<div class="container"><br>
+
+		<div class="row">
+			<div class="col-6">
+				<div class="form-group">
+					<label for="Textarea1">List 1</label>
+					<div class="dropdown">
+						<button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Populate List 1
+						</button>
+						<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							<div ng-repeat="Title in Titles">
+								<a class="dropdown-item" href="#" ng-click="Populate(1,Title)">{{Title}}</a>
+							</div>
+						</div>
+					</div>
+					<textarea class="form-control" id="Textarea1" rows="5"></textarea>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="form-group">
+					<label for="Textarea1">List 2</label>
+					<div class="dropdown">
+						<button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Populate List 2
+						</button>
+						<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							<div ng-repeat="Title in Titles">
+								<a class="dropdown-item" href="#" ng-click="Populate(2,Title)">{{Title}}</a>
+							</div>
+						</div>
+					</div>
+					<textarea class="form-control" id="Textarea2" rows="5"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<button class="btn btn-primary btn-lg" type="submit" ng-click="Go()">Go</button>
+			</div>
+		</div>
+		<div class="row">
+			<h3>Check: {{Check}}/{{Checks}} Results...</h3>
+			<table class="table table-hover table-condensed table-striped table-bordered">
+				<thead>
+					<tr>
+						<th scope="col">Word1</th>
+						<th scope="col">Word2</th>
+						<th scope="col">NORMAL1</th>
+						<th scope="col">NORMAL2</th>
+						<th scope="col">ALPHA1</th>
+						<th scope="col">ALPHA2</th>
+						<th scope="col">Lengths Difference {{LDO}}{{LD}}</th>
+						<th scope="col">Words Levenshtein Distance {{WDO}}{{WD}}</th>
+						<th scope="col">Alphanyms Levenshtein Distance {{ADO}}{{AD}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="Result in Results">
+						<td>{{Result.Word1}}</td>
+						<td>{{Result.Word2}}</td>
+						<td>{{Result.Normal1}}</td>
+						<td>{{Result.Normal2}}</td>
+						<td>{{Result.Alpha1}}</td>
+						<td>{{Result.Alpha2}}</td>
+						<td>{{Result.LenD}}</td>
+						<td>{{Result.LevD}}</td>
+						<td>{{Result.AlphaD}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+		crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"
+		integrity="sha256-23hi0Ag650tclABdGCdMNSjxvikytyQ44vYGo9HyOrU=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular-resource.min.js"
+		integrity="sha256-SlE5Vg142yVikdxa7FODJBO03XvGQGnTRcO2Tk23Mow=" crossorigin="anonymous"></script>
+	<script>
+		"use strict";
+		$(document).ready(function () {
+		});
+		//Make an array that holds the word list names
+		var app = angular.module('myApp', []);
+		app.controller('myCtrl', function ($scope) {
+			let wordlists = `
+-Countries
+Afghanistan
+Albania
+Algeria
+Andorra
+Angola
+Antigua and Barbuda
+Argentina
+Armenia
+Australia
+Austria
+Azerbaijan
+Bahamas
+Bahrain
+Bangladesh
+Barbados
+Belarus
+Belgium
+Belize
+Benin
+Bhutan
+Bolivia
+Bosnia and Herzegovina
+Botswana
+Brazil
+Brunei
+Bulgaria
+Burkina Faso
+Burundi
+Côte d'Ivoire
+Ivory Coast
+Cabo Verde
+Cape Verde
+Cambodia
+Cameroon
+Canada
+Central African Republic
+Chad
+Chile
+China
+Colombia
+Comoros
+Congo
+Costa Rica
+Croatia
+Cuba
+Cyprus
+Czechia
+Democratic Republic of the Congo
+Denmark
+Djibouti
+Dominica
+Dominican Republic
+Ecuador
+Egypt
+El Salvador
+Equatorial Guinea
+Eritrea
+Estonia
+Eswatini
+Ethiopia
+Fiji
+Finland
+France
+Gabon
+Gambia
+Georgia
+Germany
+Ghana
+Greece
+Grenada
+Guatemala
+Guinea
+Guinea-Bissau
+Guyana
+Haiti
+Holy See
+Honduras
+Hungary
+Iceland
+India
+Indonesia
+Iran
+Iraq
+Ireland
+Israel
+Italy
+Jamaica
+Japan
+Jordan
+Kazakhstan
+Kenya
+Kiribati
+Kuwait
+Kyrgyzstan
+Laos
+Latvia
+Lebanon
+Lesotho
+Liberia
+Libya
+Liechtenstein
+Lithuania
+Luxembourg
+Madagascar
+Malawi
+Malaysia
+Maldives
+Mali
+Malta
+Marshall Islands
+Mauritania
+Mauritius
+Mexico
+Micronesia
+Moldova
+Monaco
+Mongolia
+Montenegro
+Morocco
+Mozambique
+Myanmar (formerly Burma)
+Namibia
+Nauru
+Nepal
+Netherlands
+New Zealand
+Nicaragua
+Niger
+Nigeria
+North Korea
+North Macedonia
+Norway
+Oman
+Pakistan
+Palau
+Palestine State
+Panama
+Papua New Guinea
+Paraguay
+Peru
+Philippines
+Poland
+Portugal
+Qatar
+Romania
+Russia
+Rwanda
+Saint Kitts and Nevis
+Saint Lucia
+Saint Vincent and the Grenadines
+Samoa
+San Marino
+Sao Tome and Principe
+Saudi Arabia
+Senegal
+Serbia
+Seychelles
+Sierra Leone
+Singapore
+Slovakia
+Slovenia
+Solomon Islands
+Somalia
+South Africa
+South Korea
+South Sudan
+Spain
+Sri Lanka
+Sudan
+Suriname
+Sweden
+Switzerland
+Syria
+Tajikistan
+Tanzania
+Thailand
+Timor-Leste
+Togo
+Tonga
+Trinidad and Tobago
+Tunisia
+Turkey
+Turkmenistan
+Tuvalu
+Uganda
+Ukraine
+United Arab Emirates
+United Kingdom
+United States of America
+Uruguay
+Uzbekistan
+Vanuatu
+Venezuela
+Vietnam
+Yemen
+Zambia
+Zimbabwe
+-Days of the week
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+Sunday
+-Months of the year
+January
+February
+March
+April
+May
+June
+July
+August
+September
+October
+November
+December`;
+			function levenshteinDistance(a, b) {
+				const distanceMatrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+				for (let i = 0; i <= a.length; i += 1) {
+					distanceMatrix[0][i] = i;
+				}
+				for (let j = 0; j <= b.length; j += 1) {
+					distanceMatrix[j][0] = j;
+				}
+				for (let j = 1; j <= b.length; j += 1) {
+					for (let i = 1; i <= a.length; i += 1) {
+						const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+						distanceMatrix[j][i] = Math.min(
+							distanceMatrix[j][i - 1] + 1, // deletion
+							distanceMatrix[j - 1][i] + 1, // insertion
+							distanceMatrix[j - 1][i - 1] + indicator, // substitution
+						);
+					}
+				}
+
+				return distanceMatrix[b.length][a.length];
+			}
+			$scope.Opened = true;
+			$scope.Groups = [
+				{ "Operator": "LDO", "Number": "LD" },
+				{ "Operator": "WDO", "Number": "WD" },
+				{ "Operator": "ADO", "Number": "AD" },
+			]
+			$scope.Operators = [
+				{ "Visual": "=", "Internal": "==" },
+				{ "Visual": "<", "Internal": "<" },
+				{ "Visual": "<=", "Internal": "<=" },
+				{ "Visual": ">=", "Internal": ">=" },
+				{ "Visual": ">", "Internal": ">" }
+			];
+			$scope.Numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+			$scope.Populate = function (list, title) {
+				let regex = new RegExp('(?<=' + '\-' + title + '\\s+).*?(?=\\s+' + '\-' + ')', 'gs');
+				document.getElementById("Textarea" + list).value = (wordlists + '\n-').match(regex)[0];
+				$scope.Check = 0;
+				$scope.Checks = document.getElementById("Textarea1").value.split(/\r|\r\n|\n/).length * document.getElementById("Textarea2").value.split(/\r|\r\n|\n/).length;
+			}
+			$scope.ListTitles = function () {
+				let arrName = [];
+				let arrNum = 0
+				let exploded = wordlists.split(/[\r\n]+/);
+				for (let i = 0; i < exploded.length; i++) {
+					if (exploded[i][0] == '-') {
+						if (exploded[i] != '-') {
+							arrName[arrNum] = exploded[i].substr(1);
+							arrNum++;
+						}
+					}
+				}
+				$scope.Titles = arrName;
+			}
+			$scope.setting = function (thing, val) {
+				switch (val) {
+					case '==':
+						$scope[thing] = '==';
+						break;
+					case '&lt;':
+						$scope[thing] = '<';
+						break;
+					case '&lt;=':
+						$scope[thing] = '<=';
+						break;
+					case '&gt;=':
+						$scope[thing] = '>=';
+						break;
+					case '&gt;':
+						$scope[thing] = '>';
+						break;
+					default:
+						$scope[thing] = val;
+				}
+				$scope.Refresh();
+			}
+			$scope.Refresh = function () {
+				if ($scope.Opened) {
+					$scope.LDO = '==';
+					$scope.LD = 0;
+					$scope.WDO = '==';
+					$scope.WD = 2;
+					$scope.ADO = '>';
+					$scope.AD = 1;
+				}
+				$scope.Opened = false;
+			}
+			let ldr; // Length Distance Returned
+			let wdr; // Word Levenshtein Distance Returned
+			let adr; // Alphanym Levenshtein Distance Returned
+			$scope.Go = function () { // Populates the main table according to the rules
+				let arr1 = [];
+				arr1 = document.getElementById("Textarea1").value.split('\n');
+				let arr2 = [];
+				arr2 = document.getElementById("Textarea2").value.split('\n');
+				//Loop cartesian product
+				let nor1 = '';
+				let nor2 = '';
+				let alp1 = '';
+				let alp2 = '';
+				let ldo = $scope.LDO;
+				let ld = $scope.LD;
+				let wdo = $scope.WDO;
+				let wd = $scope.WD;
+				let ado = $scope.ADO;
+				let ad = $scope.AD;
+				let check = 0;
+				let checks = arr1.length * arr2.length;
+				$scope.Results = [];
+				for (let i = 0; i < arr1.length; i++) {
+					for (let j = 0; j < arr2.length; j++) {
+						check++;
+						nor1 = arr1[i].normalize().toUpperCase().replace(/[^A-Z]/g, '');
+						nor2 = arr2[j].normalize().toUpperCase().replace(/[^A-Z]/g, '');
+						ldr = Math.abs(nor1.length - nor2.length);
+						if (eval(ldr + ldo + ld)) {
+							wdr = levenshteinDistance(nor1, nor2);
+							if (eval(wdr + wdo + wd)) {
+								alp1 = nor1.split('').sort().join('');
+								alp2 = nor2.split('').sort().join('');
+								adr = levenshteinDistance(alp1, alp2);
+								if (eval(adr + ado + ad)) {
+									$scope.Results.push({
+										"Word1": arr1[i], "Normal1": nor1, "Alpha1": alp1,
+										"Word2": arr2[j], "Normal2": nor2, "Alpha2": alp2,
+										"LenD": ldr, "LevD": wdr, "AlphaD": adr
+									});
+								}
+							}
+						}
+					}
+				}
+				if (check % 10 == 0 || check == checks) {
+					$scope.Check = check;
+				}
+			}
+			$scope.ListTitles();
+			$scope.Refresh();
+		});
+	</script>
+</body>
+
+</html>
